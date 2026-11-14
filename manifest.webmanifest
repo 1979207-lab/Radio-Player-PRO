@@ -1,0 +1,31 @@
+{
+  "id": "./",
+  "name": "Radio Player PRO",
+  "short_name": "Radio PRO",
+  "description": "Интернет-радио с избранным и восстановлением соединения.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f0f0f",
+  "theme_color": "#e91e63",
+  "categories": [
+    "music",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
