@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#e91e63">
+
+<meta name="theme-color" content="#e91e63">
+<meta name="description" content="Radio Player PRO — интернет-радио с избранным и восстановлением соединения.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Radio PRO">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+<title>Radio Player PRO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #0f0f0f; color: #e0e0e0;
+    display: flex; justify-content: center; align-items: flex-start;
+    min-height: 100vh; padding: 20px;
+    transition: background 0.2s, color 0.2s;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+  body.light { background: #f2f2f2; color: #222; }
+  body.custom-bg .card {
+    background: rgba(30, 30, 30, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  body.custom-bg.light .card { background: rgba(255, 255, 255, 0.85); }
+  .card {
+    background: #1e1e1e; border-radius: 20px; padding: 22px;
+    width: 100%; max-width: 480px; border: 1px solid #333;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  body.light .card { background: #fff; border-color: #ddd; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 6px; }
+  h1 { font-size: 1.15rem; flex: 1; }
+  .icon-btn {
+    background: transparent; border: 1px solid #444; color: inherit;
+    padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .icon-btn:hover { background: #2a2a2a; }
+  body.light .icon-btn:hover { background: #eee; }
+  #bgInput { display: none; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .tab {
+    padding: 6px 12px; background: #2a2a2a; border: none; border-radius: 8px;
+    color: #bbb; font-size: 0.82rem; cursor: pointer; white-space: nowrap;
+  }
+  .tab.active { background: #e91e63; color: #fff; }
+  body.light .tab { background: #eee; color: #444; }
+  body.light .tab.active { background: #e91e63; color: #fff; }
+  body.custom-bg .tab { background: rgba(42, 42, 42, 0.7); }
+  body.custom-bg.light .tab { background: rgba(238, 238, 238, 0.8); color: #444; }
+  .search {
+    width: 100%; padding: 8px 12px; margin-bottom: 10px;
+    border-radius: 8px; border: 1px solid #333; background: #121212;
+    color: #eee; font-size: 0.9rem; outline: none;
+  }
+  body.light .search { background: #fafafa; border-color: #ccc; color: #222; }
+  body.custom-bg .search { background: rgba(18, 18, 18, 0.7); }
+  body.custom-bg.light .search { background: rgba(250, 250, 250, 0.85); }
+  .list {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 14px; max-height: 280px; overflow-y: auto;
+    padding-right: 4px;
+  }
+  .group-title {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;
+    color: #666; margin: 10px 0 2px 4px; font-weight: 600;
+  }
+  body.light .group-title { color: #999; }
+  body.custom-bg .group-title { color: #aaa; }
+  .group-title:first-child { margin-top: 0; }
+  .st {
+    padding: 10px 14px; background: #2a2a2a; border: none;
+    border-radius: 10px; color: #ccc; font-size: 0.9rem;
+    text-align: left; cursor: pointer; transition: background 0.15s;
+  }
+  .st:hover { background: #3a3a3a; }
+  .st.active { background: #e91e63; color: #fff; font-weight: 600; }
+  body.light .st { background: #eee; color: #333; }
+  body.light .st:hover { background: #ddd; }
+  body.light .st.active { background: #e91e63; color: #fff; }
+  body.custom-bg .st { background: rgba(42, 42, 42, 0.75); }
+  body.custom-bg .st:hover { background: rgba(58, 58, 58, 0.85); }
+  body.custom-bg.light .st { background: rgba(238, 238, 238, 0.85); color: #333; }
+  body.custom-bg.light .st:hover { background: rgba(221, 221, 221, 0.95); }
+  body.custom-bg .st.active { background: #e91e63; }
+  .np {
+    background: #121212; padding: 14px; border-radius: 10px;
+    margin-bottom: 12px; text-align: center; min-height: 54px;
+    display: flex; flex-direction: column; justify-content: center;
+    border: 1px solid #2a2a2a;
+  }
+  body.light .np { background: #fafafa; border-color: #ddd; }
+  body.custom-bg .np { background: rgba(18, 18, 18, 0.75); }
+  body.custom-bg.light .np { background: rgba(250, 250, 250, 0.85); }
+  .np-title { font-size: 0.98rem; font-weight: 600; }
+  .np-sub { font-size: 0.78rem; color: #888; margin-top: 4px; min-height: 16px; }
+  .eq { display: inline-flex; gap: 2px; margin-right: 6px; vertical-align: middle; }
+  .eq span {
+    width: 3px; height: 12px; background: #e91e63; border-radius: 1px;
+    animation: eq 0.8s ease-in-out infinite;
+  }
+  .eq span:nth-child(2) { animation-delay: 0.2s; }
+  .eq span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes eq {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .play {
+    width: 50px; height: 50px; border-radius: 50%; border: none;
+    background: #e91e63; color: #fff; font-size: 19px;
+    cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .play:active { transform: scale(0.95); }
+  .vol { flex: 1; display: flex; align-items: center; gap: 8px; }
+  input[type="range"] { flex: 1; accent-color: #e91e63; }
+  .status { text-align: center; font-size: 0.72rem; color: #666; min-height: 16px; }
+  body.custom-bg .status { color: #aaa; }
+  .hint { text-align: center; font-size: 0.68rem; color: #444; margin-top: 6px; }
+  body.light .hint { color: #999; }
+  body.custom-bg .hint { color: #aaa; }
+  #bgResetBtn { display: none; }
+  body.custom-bg #bgResetBtn { display: inline-block; }
+
+  .station-row { display:flex; align-items:stretch; gap:6px; }
+  .station-row .st { flex:1; min-width:0; }
+  .fav-btn { width:42px; flex-shrink:0; border:0; border-radius:10px; background:#2a2a2a; color:#888; font-size:1.15rem; cursor:pointer; }
+  .fav-btn.on { color:#ffd54f; }
+  body.light .fav-btn { background:#eee; color:#888; }
+  body.light .fav-btn.on { color:#c58b00; }
+  .st.failed { opacity:.48; border:1px solid #e57373; color:#e57373; }
+  .st.failed::after { content:' · нет связи'; font-size:.72rem; }
+  body.light .st.failed { color:#b3261e; }
+  .network-state { font-size:.72rem; text-align:center; margin:-2px 0 8px; color:#aaa; min-height:16px; }
+  .network-state.offline { color:#ff8a80; }
+  .network-state.online { color:#81c784; }
+
+
+  #installBtn[hidden] { display: none; }
+  @supports (padding: max(0px)) {
+    body { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <h1>📻 Радио</h1>
+    <button class="icon-btn" id="bgBtn" title="Свой фон">🖼️</button>
+    <button class="icon-btn" id="bgResetBtn" title="Сбросить фон">✖</button>
+    <button class="icon-btn" id="randomBtn" title="Случайная станция">🎲</button>
+    <button class="icon-btn" id="themeBtn" title="Тема">🌙</button>
+    <button class="icon-btn" id="installBtn" title="Установить приложение" hidden>⬇️</button>
+  </div>
+
+  <input type="file" id="bgInput" accept="image/*">
+
+  <div class="tabs" id="tabs"></div>
+  <div class="network-state" id="networkState" aria-live="polite"></div>
+  <input class="search" id="search" placeholder="Поиск станции..." />
+  <div class="list" id="list"></div>
+
+  <div class="np">
+    <div class="np-title">
+      <span id="eq" class="eq" hidden><span></span><span></span><span></span></span>
+      <span id="npTitleText">Выберите станцию</span>
+    </div>
+    <div class="np-sub" id="npSub"></div>
+  </div>
+
+  <div class="controls">
+    <button class="play" id="playBtn">▶</button>
+    <div class="vol">
+      <span>🔊</span>
+      <input type="range" id="vol" min="0" max="1" step="0.01" value="0.8">
+    </div>
+  </div>
+
+  <div class="status" id="status"></div>
+  <div class="hint">Space — play/pause · ↑↓ — громкость · ←→ — станция</div>
+</div>
+
+<script>
+const STATIONS = [
+  // ===== Радио Рекорд =====
+  { name: 'Радио Рекорд',                cat: 'Электроника', sub: 'Основные', url: 'https://radiorecord.hostingradio.ru/rr_main96.aacp' },
+  { name: 'Record: Супердискотека 90-х', cat: 'Ретро',       sub: '',         url: 'https://radiorecord.hostingradio.ru/sd9096.aacp' },
+  { name: 'Record: Trancemission',       cat: 'Электроника', sub: 'Trance',   url: 'https://radiorecord.hostingradio.ru/tm96.aacp' },
+  { name: 'Record: Deep',                cat: 'Электроника', sub: 'House',    url: 'https://radiorecord.hostingradio.ru/deep96.aacp' },
+  { name: 'Record: Chill-Out',           cat: 'Chill',       sub: '',         url: 'https://radiorecord.hostingradio.ru/chil96.aacp' },
+  { name: 'Record: Russian Mix',         cat: 'Русское',     sub: '',         url: 'https://radiorecord.hostingradio.ru/rus96.aacp' },
+  { name: 'Record: Pirate Station',      cat: 'Электроника', sub: 'Drum & Bass', url: 'https://radiorecord.hostingradio.ru/ps96.aacp' },
+  { name: 'Record: Rock',                cat: 'Рок',         sub: '',         url: 'https://radiorecord.hostingradio.ru/rock96.aacp' },
+  { name: 'Record: Rap Hits',            cat: 'Рэп',         sub: '',         url: 'https://radiorecord.hostingradio.ru/rap96.aacp' },
+  { name: 'Record: Megamix',             cat: 'Электроника', sub: 'Основные', url: 'https://radiorecord.hostingradio.ru/mix96.aacp' },
+  { name: 'Record: Руки Вверх!',         cat: 'Русское',     sub: '',         url: 'https://radiorecord.hostingradio.ru/rv96.aacp' },
+  { name: 'Record: Phonk',               cat: 'Рэп',         sub: '',         url: 'https://radiorecord.hostingradio.ru/phonk96.aacp' },
+  { name: 'Record: Trance Classics',     cat: 'Электроника', sub: 'Trance',   url: 'https://radiorecord.hostingradio.ru/trancehits96.aacp' },
+  { name: 'Record: Rap Classics',        cat: 'Рэп',         sub: '',         url: 'https://radiorecord.hostingradio.ru/rapclassics96.aacp' },
+  { name: 'Record: Russian Gold',        cat: 'Русское',     sub: '',         url: 'https://radiorecord.hostingradio.ru/russiangold96.aacp' },
+  { name: 'Record: Russian Hits',        cat: 'Русское',     sub: '',         url: 'https://radiorecord.hostingradio.ru/russianhits64.aacp' },
+  { name: 'Record: Big Hits',            cat: 'Поп',         sub: '',         url: 'https://radiorecord.hostingradio.ru/bighits96.aacp' },
+  { name: 'Record: Record Gold',         cat: 'Поп',         sub: '',         url: 'https://radiorecord.hostingradio.ru/gold96.aacp' },
+  { name: 'Record: Record 80-х',         cat: 'Ретро',       sub: '',         url: 'https://radiorecord.hostingradio.ru/198096.aacp' },
+  { name: 'Record: Record 00-х',         cat: 'Ретро',       sub: '',         url: 'https://radiorecord.hostingradio.ru/200096.aacp' },
+  { name: 'Record: Remix',               cat: 'Электроника', sub: 'Основные', url: 'https://radiorecord.hostingradio.ru/rmx96.aacp' },
+  { name: 'Record: Chill House',         cat: 'Chill',       sub: 'House',    url: 'https://radiorecord.hostingradio.ru/chillhouse96.aacp' },
+  { name: 'Record: Organic',             cat: 'Chill',       sub: 'House',    url: 'https://radiorecord.hostingradio.ru/organic96.aacp' },
+  { name: 'Record: Innocence',           cat: 'Электроника', sub: 'House',    url: 'https://radiorecord.hostingradio.ru/ibiza96.aacp' },
+  { name: 'Record: Party 24/7',          cat: 'Поп',         sub: '',         url: 'https://radiorecord.hostingradio.ru/party96.aacp' },
+  { name: 'Record: Summer Dance',        cat: 'Поп',         sub: '',         url: 'https://radiorecord.hostingradio.ru/summerparty96.aacp' },
+  { name: 'Record: На Хайпе',            cat: 'Поп',         sub: '',         url: 'https://radiorecord.hostingradio.ru/hype96.aacp' },
+  { name: 'Record: VIP House',           cat: 'Электроника', sub: 'House',    url: 'https://radiorecord.hostingradio.ru/vip96.aacp' },
+  { name: 'Record: Bass House',          cat: 'Электроника', sub: 'House',    url: 'https://radiorecord.hostingradio.ru/jackin96.aacp' },
+  { name: 'Record: Маятник Фуко',        cat: 'Электроника', sub: 'Techno',   url: 'https://radiorecord.hostingradio.ru/mf96.aacp' },
+  { name: 'Record: Afro House',          cat: 'Электроника', sub: 'House',    url: 'https://radiorecord.hostingradio.ru/afro96.aacp' },
+  { name: 'Record: Mashup',              cat: 'Электроника', sub: 'Основные', url: 'https://radiorecord.hostingradio.ru/mashup96.aacp' },
+  { name: 'Record: Melodic Techno',      cat: 'Электроника', sub: 'Techno',   url: 'https://radiorecord.hostingradio.ru/melodic96.aacp' },
+  { name: 'Record: A State of Trance',   cat: 'Электроника', sub: 'Trance',   url: 'https://radiorecord.hostingradio.ru/asot96.aacp' },
+  { name: 'Record: Beach Party',         cat: 'Chill',       sub: '',         url: 'https://radiorecord.hostingradio.ru/beach96.aacp' },
+  { name: 'Record: Workout',             cat: 'Поп',         sub: '',         url: 'https://radiorecord.hostingradio.ru/workout96.aacp' },
+
+  // ===== DFM =====
+  { name: 'DFM',                         cat: 'Поп',         sub: '',         url: 'https://dfm.hostingradio.ru/dfm96.aacp' },
+  { name: 'DFM Rap',                     cat: 'Рэп',         sub: '',         url: 'https://dfm-dfmrap.hostingradio.ru/dfmrap96.aacp' },
+  { name: 'DFM AfroVibes',               cat: 'Электроника', sub: 'House',    url: 'https://dfm-afrovibes.hostingradio.ru/afrovibes96.aacp' },
+  { name: 'DFM Dance Hall',              cat: 'Поп',         sub: '',         url: 'https://hls-01-dfm.hostingradio.ru/dancehall/playlist.m3u8' },
+  { name: 'DFM Tech House',              cat: 'Электроника', sub: 'House',    url: 'https://hls-01-dfm.hostingradio.ru/techhouse/playlist.m3u8' },
+  { name: 'DFM Organic House',           cat: 'Chill',       sub: 'House',    url: 'https://hls-01-dfm.hostingradio.ru/organichouse/playlist.m3u8' },
+  { name: 'DFM Remake',                  cat: 'Поп',         sub: '',         url: 'https://hls-01-dfm.hostingradio.ru/remake/playlist.m3u8' },
+  { name: 'DFM Breakbeat',               cat: 'Электроника', sub: 'Breakbeat', url: 'https://hls-01-dfm.hostingradio.ru/breakbeat/playlist.m3u8' },
+
+  // ===== Ретро FM =====
+  { name: 'Ретро FM',                    cat: 'Ретро',       sub: '',         url: 'https://retroserver.streamr.ru:8043/retro256.mp3' },
+  { name: 'Ретро FM 70-е',               cat: 'Ретро',       sub: '',         url: 'https://retro70.hostingradio.ru:8025/retro70-128.mp3' },
+  { name: 'Ретро FM 80-е',               cat: 'Ретро',       sub: '',         url: 'https://retro80.hostingradio.ru:8025/retro80-128.mp3' },
+  { name: 'Ретро FM 90-е',               cat: 'Ретро',       sub: '',         url: 'https://retro90.hostingradio.ru:8025/retro90-128.mp3' },
+
+  // ===== Маяк =====
+  { name: 'Радио Маяк',                  cat: 'Разговорное', sub: '',         url: 'https://icecast-vgtrk.cdnvideo.ru/mayakfm_aac_64kbps' },
+  { name: 'Радио Маяк (192k)',           cat: 'Разговорное', sub: '',         url: 'https://icecast.vgtrk.cdnvideo.ru/mayakfm_mp3_192kbps' },
+  // ===== Дополнительные станции =====
+  { name: 'Русское Радио', cat: 'Русское', sub: 'Основные', url: 'https://rusradio.hostingradio.ru/rusradio96.aacp' },
+  { name: 'Авторадио', cat: 'Поп', sub: 'Основные', url: 'https://srv21.gpmradio.ru:8443/stream/air/aac/64/100' },
+  { name: 'Дорожное радио', cat: 'Поп', sub: 'Основные', url: 'https://dorognoe.hostingradio.ru/dorognoe' },
+  { name: 'Ретро FM', cat: 'Ретро', sub: 'Основные', url: 'https://retro.hostingradio.ru:8043/retro256.mp3' },
+  { name: 'Наше Радио', cat: 'Рок', sub: 'Основные', url: 'https://nashe1.hostingradio.ru/nashe-256' },
+  { name: 'Радио Шансон', cat: 'Шансон', sub: 'Основные', url: 'https://zaycevfm.cdnvideo.ru/ZaycevFM_shanson_256.mp3' },
+
+];
+
+const audio = new Audio();
+audio.preload = 'none';
+
+const $ = id => document.getElementById(id);
+const listEl = $('list'), tabsEl = $('tabs'), searchEl = $('search'),
+      playBtn = $('playBtn'), npTitleText = $('npTitleText'), npSub = $('npSub'),
+      statusEl = $('status'), volEl = $('vol'), themeBtn = $('themeBtn'),
+      randomBtn = $('randomBtn'), eqEl = $('eq'),
+      bgBtn = $('bgBtn'), bgInput = $('bgInput'), bgResetBtn = $('bgResetBtn');
+
+let current = -1, playing = false, category = 'Все', query = '';
+let favorites = new Set(), failedStations = new Set();
+let wantPlayback = false, userPaused = false, playToken = 0;
+let recoveryTimer = null, retryAttempt = 0, lastPauseWasSystem = false;
+const networkStateEl = $('networkState');
+const RETRY_DELAYS = [3000, 5000, 10000, 20000, 30000];
+
+// ----- Человеческие ошибки -----
+function humanError(code) {
+  return ({
+    1: 'Загрузка прервана',
+    2: 'Нет соединения',
+    3: 'Ошибка декодирования',
+    4: 'Станция недоступна или формат не поддерживается'
+  })[code] || 'Неизвестная ошибка';
+}
+
+// ----- Сохранение / загрузка -----
+function save() {
+  try {
+    localStorage.setItem('radio', JSON.stringify({
+      station: current, volume: audio.volume,
+      theme: document.body.classList.contains('light') ? 'light' : 'dark',
+      bg: bgDataUrl || '',
+      favorites: [...favorites]
+    }));
+  } catch (e) {
+    statusEl.textContent = 'Не удалось сохранить фон (файл слишком большой)';
+  }
+}
+
+let bgDataUrl = '';
+
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem('radio') || '{}');
+    if (typeof s.volume === 'number') { audio.volume = s.volume; volEl.value = s.volume; }
+    if (s.theme === 'light') { document.body.classList.add('light'); themeBtn.textContent = '☀️'; }
+    if (s.bg) applyBackground(s.bg);
+    favorites = new Set(Array.isArray(s.favorites) ? s.favorites.filter(i => Number.isInteger(i) && i >= 0 && i < STATIONS.length) : []);
+    return typeof s.station === 'number' ? s.station : -1;
+  } catch (e) { return -1; }
+}
+
+// ----- Тема -----
+themeBtn.onclick = () => {
+  document.body.classList.toggle('light');
+  themeBtn.textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+  save();
+};
+
+// ----- Свой фон -----
+bgBtn.onclick = () => bgInput.click();
+
+bgInput.onchange = e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    statusEl.textContent = 'Файл больше 2 МБ — выберите меньший';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    applyBackground(ev.target.result);
+    save();
+  };
+  reader.readAsDataURL(file);
+};
+
+bgResetBtn.onclick = () => {
+  bgDataUrl = '';
+  document.body.style.backgroundImage = '';
+  document.body.classList.remove('custom-bg');
+  save();
+};
+
+function applyBackground(dataUrl) {
+  bgDataUrl = dataUrl;
+  document.body.style.backgroundImage = `url(${dataUrl})`;
+  document.body.classList.add('custom-bg');
+}
+
+// ----- Случайная станция -----
+randomBtn.onclick = () => {
+  if (!STATIONS.length) return;
+  let r;
+  do { r = Math.floor(Math.random() * STATIONS.length); }
+  while (r === current && STATIONS.length > 1);
+  category = 'Все'; query = ''; searchEl.value = '';
+  renderTabs();
+  select(r);
+};
+
+// ----- Табы -----
+const cats = ['Все', 'Избранное', ...new Set(STATIONS.map(s => s.cat))];
+function renderTabs() {
+  tabsEl.innerHTML = '';
+  cats.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'tab' + (c === category ? ' active' : '');
+    b.textContent = c === 'Избранное' ? '★ Избранное' : c;
+    b.onclick = () => { category = c; renderTabs(); renderList(); };
+    tabsEl.appendChild(b);
+  });
+}
+function toggleFavorite(i) {
+  if (favorites.has(i)) favorites.delete(i); else favorites.add(i);
+  save(); renderList(); renderTabs();
+}
+function renderList() {
+  const top = listEl.scrollTop;
+  listEl.innerHTML = '';
+  const q = query.trim().toLowerCase(), visible = [];
+  STATIONS.forEach((st, i) => {
+    if (category === 'Избранное' && !favorites.has(i)) return;
+    if (category !== 'Все' && category !== 'Избранное' && st.cat !== category) return;
+    if (q && !`${st.name} ${st.cat} ${st.sub || ''}`.toLowerCase().includes(q)) return;
+    visible.push({st, i});
+  });
+  if (!visible.length) {
+    const empty = document.createElement('div'); empty.className = 'group-title';
+    empty.textContent = category === 'Избранное' ? 'Пока нет избранных станций — нажмите ☆ рядом со станцией' : 'Ничего не найдено';
+    listEl.appendChild(empty); return;
+  }
+  const groups = {};
+  visible.forEach(v => { const key = category === 'Избранное' ? '' : (v.st.sub || ''); (groups[key] ||= []).push(v); });
+  Object.keys(groups).sort((a,b) => !a ? -1 : !b ? 1 : a.localeCompare(b)).forEach(key => {
+    if (key) { const h = document.createElement('div'); h.className = 'group-title'; h.textContent = key; listEl.appendChild(h); }
+    groups[key].forEach(({st, i}) => {
+      const row = document.createElement('div'); row.className = 'station-row';
+      const b = document.createElement('button');
+      b.className = 'st' + (i === current ? ' active' : '') + (failedStations.has(i) ? ' failed' : '');
+      b.textContent = st.name; b.title = failedStations.has(i) ? 'Последнее подключение не удалось — нажмите для повтора' : st.name;
+      b.onclick = () => select(i);
+      const f = document.createElement('button'); f.className = 'fav-btn' + (favorites.has(i) ? ' on' : '');
+      f.textContent = favorites.has(i) ? '★' : '☆'; f.title = favorites.has(i) ? 'Убрать из избранного' : 'Добавить в избранное';
+      f.setAttribute('aria-label', f.title); f.onclick = () => toggleFavorite(i);
+      row.append(b, f); listEl.appendChild(row);
+    });
+  });
+  listEl.scrollTop = top;
+}
+
+searchEl.oninput = e => { query = e.target.value; renderList(); };
+
+// ----- Выбор станции и управление воспроизведением -----
+function cancelRecovery() { if (recoveryTimer) clearTimeout(recoveryTimer); recoveryTimer = null; }
+function select(i) {
+  if (i < 0 || i >= STATIONS.length) return;
+  if (i === current && playing) {
+    userPaused = true; wantPlayback = false; cancelRecovery(); playToken++;
+    audio.pause(); playing = false; updateBtn(); statusEl.textContent = 'Пауза'; eqEl.hidden = true; return;
+  }
+  current = i; userPaused = false; wantPlayback = true; retryAttempt = 0;
+  cancelRecovery(); playToken++;
+  npTitleText.textContent = STATIONS[i].name; npSub.textContent = 'Подключение к станции...';
+  renderList(); startPlayback(i, 'manual');
+}
+async function startPlayback(i, reason) {
+  if (!navigator.onLine) {
+    setNetworkStatus(false); statusEl.textContent = 'Нет интернета — ожидаю соединение';
+    scheduleRecovery(); return;
+  }
+  const token = ++playToken, st = STATIONS[i];
+  current = i;
+  try {
+    audio.pause(); audio.src = st.url; audio.load();
+    statusEl.textContent = reason === 'recovery' ? 'Восстанавливаю соединение...' : 'Подключение...';
+    await audio.play();
+    if (token !== playToken || i !== current || !wantPlayback) return;
+    playing = true; userPaused = false; retryAttempt = 0; failedStations.delete(i);
+    updateBtn(); statusEl.textContent = 'Играет'; npTitleText.textContent = st.name;
+    npSub.textContent = '🎵 Поток воспроизводится'; eqEl.hidden = false;
+    document.title = '▶ ' + st.name; setupMediaSession(st.name); save(); resetWatchdog();
+    renderList(); cancelRecovery();
+  } catch (err) {
+    if (token !== playToken || i !== current) return;
+    playing = false; updateBtn(); eqEl.hidden = true; failedStations.add(i); renderList();
+    statusEl.textContent = err?.name === 'NotAllowedError'
+      ? 'Нажмите ▶ для разрешения воспроизведения'
+      : (audio.error ? humanError(audio.error.code) : 'Станция не отвечает');
+    npSub.textContent = 'Не удалось подключиться — повторю автоматически';
+    document.title = 'Радио Плеер';
+    if (wantPlayback && !userPaused) scheduleRecovery();
+  }
+}
+function scheduleRecovery() {
+  if (!wantPlayback || userPaused || current < 0 || recoveryTimer) return;
+  const delay = RETRY_DELAYS[Math.min(retryAttempt, RETRY_DELAYS.length - 1)];
+  retryAttempt++;
+  recoveryTimer = setTimeout(() => {
+    recoveryTimer = null;
+    if (wantPlayback && !userPaused && current >= 0) startPlayback(current, 'recovery');
+  }, delay);
+}
+playBtn.onclick = () => {
+  if (current === -1) { select(0); return; }
+  if (playing) {
+    userPaused = true; wantPlayback = false; cancelRecovery(); playToken++;
+    audio.pause(); playing = false; updateBtn(); statusEl.textContent = 'Пауза'; eqEl.hidden = true;
+  } else {
+    userPaused = false; wantPlayback = true; retryAttempt = 0; startPlayback(current, 'manual');
+  }
+};
+
+function updateBtn() { playBtn.textContent = playing ? '⏸' : '▶'; }
+
+// ----- Media Session -----
+function setupMediaSession(name) {
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: name, artist: 'Онлайн-радио', album: ''
+    });
+    navigator.mediaSession.setActionHandler('play', () => { if (!playing) playBtn.click(); });
+    navigator.mediaSession.setActionHandler('pause', () => { if (playing) playBtn.click(); });
+    navigator.mediaSession.setActionHandler('nexttrack', () => select((current + 1) % STATIONS.length));
+    navigator.mediaSession.setActionHandler('previoustrack', () => select((current - 1 + STATIONS.length) % STATIONS.length));
+  } catch (e) {}
+}
+
+// ----- Громкость -----
+volEl.oninput = e => { audio.volume = parseFloat(e.target.value); save(); };
+
+// ----- Клавиши -----
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); playBtn.click(); }
+  else if (e.code === 'ArrowUp') { e.preventDefault(); audio.volume = Math.min(1, audio.volume + 0.05); volEl.value = audio.volume; save(); }
+  else if (e.code === 'ArrowDown') { e.preventDefault(); audio.volume = Math.max(0, audio.volume - 0.05); volEl.value = audio.volume; save(); }
+  else if (e.code === 'ArrowRight') { e.preventDefault(); select((current + 1) % STATIONS.length); }
+  else if (e.code === 'ArrowLeft') { e.preventDefault(); select((current - 1 + STATIONS.length) % STATIONS.length); }
+});
+
+// ----- Сеть, системная пауза и автоматическое восстановление -----
+function setNetworkStatus(online) {
+  networkStateEl.textContent = online ? '● Интернет подключён' : '● Нет подключения к интернету';
+  networkStateEl.className = 'network-state ' + (online ? 'online' : 'offline');
+}
+window.addEventListener('offline', () => {
+  setNetworkStatus(false);
+  if (wantPlayback && !userPaused) {
+    audio.pause(); playing = false; updateBtn(); eqEl.hidden = true;
+    statusEl.textContent = 'Интернет пропал — жду восстановления...'; cancelRecovery();
+  }
+});
+window.addEventListener('online', () => {
+  setNetworkStatus(true);
+  if (wantPlayback && !userPaused && current >= 0) {
+    retryAttempt = 0; cancelRecovery(); startPlayback(current, 'recovery');
+  }
+});
+setNetworkStatus(navigator.onLine);
+
+audio.onwaiting = () => { if (wantPlayback) statusEl.textContent = 'Буферизация...'; };
+audio.onplaying = () => {
+  if (!wantPlayback || userPaused) { audio.pause(); return; }
+  playing = true; updateBtn(); statusEl.textContent = 'Играет'; eqEl.hidden = false; lastPauseWasSystem = false;
+};
+audio.onpause = () => {
+  playing = false; updateBtn(); eqEl.hidden = true;
+  if (wantPlayback && !userPaused && navigator.onLine) {
+    lastPauseWasSystem = true;
+    statusEl.textContent = 'Воспроизведение приостановлено системой — ожидаю аудиоустройство';
+  }
+};
+audio.onerror = () => {
+  if (!audio.error) return;
+  playing = false; updateBtn(); eqEl.hidden = true;
+  if (current >= 0) { failedStations.add(current); renderList(); }
+  statusEl.textContent = humanError(audio.error.code);
+  if (wantPlayback && !userPaused) scheduleRecovery();
+};
+function resumeAfterAudioFocus() {
+  if (lastPauseWasSystem && wantPlayback && !userPaused && navigator.onLine && current >= 0) {
+    lastPauseWasSystem = false; startPlayback(current, 'recovery');
+  }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) resumeAfterAudioFocus(); });
+window.addEventListener('focus', resumeAfterAudioFocus);
+window.addEventListener('pageshow', resumeAfterAudioFocus);
+if (navigator.mediaDevices?.addEventListener) {
+  navigator.mediaDevices.addEventListener('devicechange', () => {
+    // Не каждый Android-браузер сообщает об изменении Bluetooth-аудиовыхода.
+    if (lastPauseWasSystem) resumeAfterAudioFocus();
+  });
+}
+
+// ----- Контроль зависшего потока -----
+let lastTime = 0, stallCount = 0;
+function resetWatchdog() { lastTime = audio.currentTime; stallCount = 0; }
+setInterval(() => {
+  if (!wantPlayback || userPaused || !playing || current < 0 || document.hidden) {
+    lastTime = audio.currentTime; return;
+  }
+  if (audio.paused || audio.readyState < 2) return;
+  if (audio.currentTime === lastTime) {
+    stallCount++;
+    if (stallCount >= 3) {
+      stallCount = 0; statusEl.textContent = 'Поток завис — переподключаюсь...';
+      startPlayback(current, 'recovery');
+    }
+  } else { stallCount = 0; lastTime = audio.currentTime; }
+}, 5000);
+
+// ----- Старт -----
+const saved = load();
+renderTabs();
+if (saved >= 0 && saved < STATIONS.length) {
+  current = saved;
+  npTitleText.textContent = STATIONS[saved].name;
+  npSub.textContent = 'Нажмите ▶ для воспроизведения';
+}
+renderList();
+if (!navigator.onLine) setNetworkStatus(false);
+</script>
+
+<script>
+// ----- PWA: установка и Service Worker -----
+(() => {
+  const installBtn = document.getElementById('installBtn');
+  let installPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    installPrompt = event;
+    if (installBtn) installBtn.hidden = false;
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!installPrompt) {
+        const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        statusEl.textContent = isIOS
+          ? 'Для установки нажмите «Поделиться» → «На экран Домой»'
+          : 'Откройте меню Chrome и выберите «Установить приложение»';
+        return;
+      }
+      installPrompt.prompt();
+      await installPrompt.userChoice;
+      installPrompt = null;
+      installBtn.hidden = true;
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    if (installBtn) installBtn.hidden = true;
+    if (typeof statusEl !== 'undefined') statusEl.textContent = 'Radio Player PRO установлено';
+  });
+
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then((registration) => {
+          registration.update().catch(() => {});
+          registration.addEventListener('updatefound', () => {
+            const worker = registration.installing;
+            if (!worker) return;
+            worker.addEventListener('statechange', () => {
+              if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                if (typeof statusEl !== 'undefined') {
+                  statusEl.textContent = 'Доступно обновление приложения — перезагрузите страницу';
+                }
+              }
+            });
+          });
+        })
+        .catch((error) => console.warn('Не удалось зарегистрировать Service Worker:', error));
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
