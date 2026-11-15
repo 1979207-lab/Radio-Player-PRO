@@ -37,7 +37,7 @@
 
   const normalize = value => value.toLocaleLowerCase('ru-RU')
     .replace(/ё/g, 'е').replace(/[?!.,;:]/g, ' ')
-    .replace(/\\s+/g, ' ').trim();
+    .replace(/\s+/g, ' ').trim();
 
   function setMode(next) {
     mode = next;
@@ -103,7 +103,7 @@
       return true;
     }
 
-    const volumeMatch = text.match(/громкость(?: на)? (\\d{1,3})(?: процентов?)?/);
+    const volumeMatch = text.match(/громкость(?: на)? (\d{1,3})(?: процентов?)?/);
     if (volumeMatch) {
       const percent = Math.max(0, Math.min(100, Number(volumeMatch[1])));
       audio.volume = percent / 100; volEl.value = audio.volume; save();
