@@ -1,10 +1,11 @@
 /* Radio Player PRO — Service Worker. Кеширует только оболочку, не радиопотоки. */
-const CACHE_NAME='radio-player-pro-shell-v1';
+const CACHE_NAME='radio-player-pro-shell-v2';
 const BASE=new URL('./',self.registration.scope);
 const SHELL=[
  new URL('./',BASE).href,
  new URL('index.html',BASE).href,
  new URL('manifest.webmanifest',BASE).href,
+ new URL('voice-control.js',BASE).href,
  new URL('icons/icon.svg',BASE).href,
  new URL('icons/maskable.svg',BASE).href
 ];
