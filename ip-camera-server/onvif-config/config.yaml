@@ -1,0 +1,27 @@
+server:
+  advertise_ip: ""
+  discovery: false
+
+web:
+  enabled: true
+  port: 8080
+  username: ""
+  password: ""
+
+devices:
+  - name: "Phone Android Camera"
+    info:
+      manufacturer: "PhoneCam"
+      model: "Android PWA Camera"
+      firmware: "1.0"
+    ports:
+      soap: 8081
+      rtsp: 8554
+    streams:
+      - name: main
+        rtsp: "rtsp://mediamtx:8554/phonecam"
+        codec: h264
+        width: 1280
+        height: 720
+        framerate: 15
+        bitrate: 1400

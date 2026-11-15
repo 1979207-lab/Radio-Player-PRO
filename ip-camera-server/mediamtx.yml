@@ -1,0 +1,6 @@
+logLevel: info
+rtsp: yes
+rtspAddress: :8554
+paths:
+  phonecam:
+    source: publisher

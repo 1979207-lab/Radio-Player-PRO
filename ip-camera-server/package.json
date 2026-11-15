@@ -1,0 +1,9 @@
+{
+  "name": "phone-ip-camera-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket ingest bridge from Android PWA to MediaMTX",
+  "main": "server.js",
+  "scripts": {"start":"node server.js"},
+  "dependencies": {"ws":"^8.18.0"}
+}

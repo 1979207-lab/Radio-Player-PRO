@@ -1,0 +1,4 @@
+{$HOST_IP}:8443 {
+    tls internal
+    reverse_proxy app:8090
+}
