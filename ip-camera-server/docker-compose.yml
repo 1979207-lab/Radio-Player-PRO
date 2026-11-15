@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       PORT: "8090"
-      CAMERA_TOKEN: \${CAMERA_TOKEN}
+      CAMERA_TOKEN: ${CAMERA_TOKEN}
       RTSP_TARGET: "rtsp://mediamtx:8554/phonecam"
     depends_on:
       - mediamtx
@@ -32,10 +32,10 @@ services:
     volumes:
       - ./onvif-config:/config
     environment:
-      ONVIF_ADVERTISE_IP: \${HOST_IP}
+      ONVIF_ADVERTISE_IP: ${HOST_IP}
       ONVIF_DISCOVERY: "false"
-      ONVIF_WEB_USERNAME: \${ONVIF_WEB_USERNAME:-admin}
-      ONVIF_WEB_PASSWORD: \${ONVIF_WEB_PASSWORD}
+      ONVIF_WEB_USERNAME: ${ONVIF_WEB_USERNAME:-admin}
+      ONVIF_WEB_PASSWORD: ${ONVIF_WEB_PASSWORD}
 
   caddy:
     image: caddy:2
@@ -44,7 +44,7 @@ services:
     depends_on:
       - app
     environment:
-      HOST_IP: \${HOST_IP}
+      HOST_IP: ${HOST_IP}
     ports:
       - "8443:8443/tcp"
     volumes:
