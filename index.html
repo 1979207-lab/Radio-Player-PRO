@@ -151,6 +151,16 @@
   .network-state.online { color:#81c784; }
 
 
+
+  .voice-controls { display:flex; gap:8px; margin:10px 0 6px; }
+  .voice-btn { flex:1; min-height:44px; border:1px solid #555; border-radius:10px; background:#292929; color:inherit; font-size:.88rem; cursor:pointer; padding:8px; }
+  .voice-btn.primary { background:#e91e63; color:#fff; border-color:#e91e63; }
+  .voice-btn.active { background:#176b45; border-color:#2eaa70; color:#fff; }
+  .voice-status { text-align:center; min-height:18px; font-size:.76rem; color:#aaa; margin:3px 0 2px; }
+  .voice-status.error { color:#ff8a80; }
+  body.light .voice-btn { background:#eee; border-color:#ccc; color:#222; }
+  body.light .voice-btn.primary, body.light .voice-btn.active { background:#e91e63; color:#fff; border-color:#e91e63; }
+
   #installBtn[hidden] { display: none; }
   @supports (padding: max(0px)) {
     body { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
@@ -193,6 +203,11 @@
     </div>
   </div>
 
+  <div class="voice-controls">
+    <button class="voice-btn primary" id="voiceBtn" type="button">🎙️ Голосовая команда</button>
+    <button class="voice-btn" id="voiceWakeBtn" type="button" aria-pressed="false">👂 Привет, радио</button>
+  </div>
+  <div class="voice-status" id="voiceStatus" aria-live="polite">Голосовое управление готово</div>
   <div class="status" id="status"></div>
   <div class="hint">Space — play/pause · ↑↓ — громкость · ←→ — станция</div>
 </div>
@@ -592,6 +607,8 @@ if (saved >= 0 && saved < STATIONS.length) {
 renderList();
 if (!navigator.onLine) setNetworkStatus(false);
 </script>
+
+<script src="./voice-control.js"></script>
 
 <script>
 // ----- PWA: установка и Service Worker -----
